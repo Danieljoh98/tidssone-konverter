@@ -1,0 +1,480 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <title>Norwegian Time Converter - Tab Mode</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+            background: linear-gradient(135deg, #BA1A2C 0%, #003DA5 50%, #FFFFFF 100%);
+            color: white;
+            height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            text-align: center;
+            overflow: hidden;
+        }
+        
+        .extension-wrapper {
+            width: 320px;
+            height: 520px;
+            display: flex;
+            flex-direction: column;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+            border-radius: 12px;
+            overflow: hidden;
+        }
+        
+        .header {
+            background: #BA1A2C;
+            padding: 8px 10px;
+            color: white;
+            cursor: move;
+            border-bottom: 1px solid rgba(255,255,255,0.1);
+            flex-shrink: 0;
+        }
+        
+        .header-controls {
+            display: flex;
+            justify-content: flex-end;
+            align-items: center;
+            gap: 8px;
+            margin-bottom: 6px;
+        }
+        
+        .pin-btn {
+            background: rgba(255,255,255,0.15);
+            border: 1px solid rgba(255,255,255,0.2);
+            color: white;
+            padding: 4px 8px;
+            border-radius: 12px;
+            font-size: 10px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            font-weight: 500;
+            white-space: nowrap;
+        }
+        
+        .pin-btn:hover {
+            background: rgba(255,255,255,0.25);
+            transform: translateY(-1px);
+        }
+        
+        .pin-btn.active {
+            background: rgba(255,255,255,0.9);
+            color: #BA1A2C;
+        }
+        
+        h2 {
+            font-size: 18px;
+            font-weight: 700;
+            letter-spacing: -0.3px;
+            margin: 0;
+        }
+        
+        .container {
+            background: #ffffff;
+            color: #1d1d1f;
+            padding: 10px;
+            overflow-y: visible;
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+        
+        .input-group {
+            display: flex;
+            flex-direction: column;
+            gap: 4px;
+        }
+        
+        .input-group.target-section {
+            border-top: 2px solid #003DA5;
+            padding-top: 12px;
+            margin-top: 6px;
+        }
+        
+        .input-group.target-section label {
+            color: #003DA5;
+            font-weight: 700;
+        }
+        
+        label {
+            font-weight: 600;
+            font-size: 12px;
+            color: #1d1d1f;
+        }
+        
+        input, select {
+            width: 100%;
+            padding: 8px 10px;
+            border: 1.5px solid #e5e5e7;
+            border-radius: 6px;
+            font-size: 13px;
+            background: #ffffff;
+            color: #1d1d1f;
+            transition: all 0.2s ease;
+            font-family: inherit;
+        }
+        
+        input:focus, select:focus {
+            outline: none;
+            border-color: #003DA5;
+            box-shadow: 0 0 0 3px rgba(0, 61, 165, 0.1);
+        }
+        
+        input:hover, select:hover {
+            border-color: #003DA5;
+        }
+        
+        .input-row {
+            display: grid;
+            grid-template-columns: 2fr 1fr;
+            gap: 8px;
+        }
+        
+        .result-section {
+            background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+            border-radius: 8px;
+            padding: 10px;
+            border: 1.5px solid #e5e5e7;
+            text-align: center;
+            flex-shrink: 0;
+        }
+        
+        .result-time {
+            font-size: 24px;
+            font-weight: 800;
+            color: #1d1d1f;
+            margin-bottom: 6px;
+            letter-spacing: -0.5px;
+            min-height: 0;
+        }
+        
+        .result-time:empty {
+            display: none;
+            margin-bottom: 0;
+        }
+        
+        .result-details {
+            font-size: 12px;
+            color: #6e6e73;
+            line-height: 1.4;
+        }
+        
+        .button-group {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 10px;
+            flex-shrink: 0;
+        }
+        
+        .btn {
+            padding: 8px 12px;
+            border: none;
+            border-radius: 6px;
+            font-size: 13px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            font-family: inherit;
+        }
+        
+        .btn-primary {
+            background: #BA1A2C;
+            color: white;
+        }
+        
+        .btn-primary:hover {
+            background: #9A1525;
+            transform: translateY(-1px);
+            box-shadow: 0 4px 12px rgba(186, 26, 44, 0.3);
+        }
+        
+        .btn-secondary {
+            background: #f5f5f7;
+            color: #1d1d1f;
+            border: 1.5px solid #e5e5e7;
+        }
+        
+        .btn-secondary:hover {
+            background: #e5e5e7;
+            transform: translateY(-1px);
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+        }
+        
+        .countdown-section {
+            margin-top: 0;
+            padding: 10px;
+            background: linear-gradient(135deg, #003DA5 0%, #004DBF 100%);
+            border-radius: 8px;
+            text-align: center;
+            border: 1.5px solid #003DA5;
+            flex-shrink: 0;
+        }
+        
+        .countdown-info {
+            font-size: 12px;
+            color: rgba(255,255,255,0.95);
+            margin: 0 0 10px 0;
+            line-height: 1.4;
+            font-weight: 500;
+        }
+        
+        .countdown-section .btn {
+            background: rgba(255,255,255,0.95);
+            color: #003DA5;
+            border: none;
+            font-weight: 700;
+            padding: 10px 18px;
+            font-size: 13px;
+        }
+        
+        .countdown-section .btn:hover {
+            background: white;
+            transform: translateY(-1px);
+        }
+        
+        optgroup {
+            font-weight: 700;
+            color: #1d1d1f;
+            background: #f8f9fa;
+        }
+        
+        option {
+            padding: 6px;
+            font-weight: 400;
+            background: #ffffff;
+        }
+        
+        /* Smooth entrance animation */
+        .extension-wrapper {
+            animation: fadeIn 0.5s ease;
+        }
+        
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+        
+        .input-group, .result-section, .button-group {
+            animation: slideUp 0.3s ease;
+        }
+        
+        @keyframes slideUp {
+            from {
+                opacity: 0;
+                transform: translateY(10px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+    </style>
+</head>
+<body>    <div class="extension-wrapper">
+        <div class="header">
+            <div class="header-controls">
+                <button class="pin-btn" id="createTabBtn">Create Tab</button>
+                <button class="pin-btn" id="unpinBtn">Unpin Window</button>
+            </div>
+            <h2>Norwegian Time Converter</h2>
+        </div>
+
+        <div class="container">
+            <div class="input-group">
+                <label>From Timezone</label>
+                <select id="timezone">
+                    <option value="">Select timezone...</option>
+                    <optgroup label="America">
+                        <option value="PST">PST - Pacific Standard Time</option>
+                        <option value="PDT">PDT - Pacific Daylight Time</option>
+                        <option value="EST">EST - Eastern Standard Time</option>
+                        <option value="EDT">EDT - Eastern Daylight Time</option>
+                        <option value="CST">CST - Central Standard Time</option>
+                        <option value="CDT">CDT - Central Daylight Time</option>
+                        <option value="MST">MST - Mountain Standard Time</option>
+                        <option value="MDT">MDT - Mountain Daylight Time</option>
+                    </optgroup>
+                    <optgroup label="Europe">
+                        <option value="CET">CET - Central European Time</option>
+                        <option value="CEST">CEST - Central European Summer Time</option>
+                        <option value="GMT">GMT - Greenwich Mean Time</option>
+                        <option value="BST">BST - British Summer Time</option>
+                        <option value="EET">EET - Eastern European Time</option>
+                        <option value="EEST">EEST - Eastern European Summer Time</option>
+                    </optgroup>
+                    <optgroup label="Asia">
+                        <option value="JST">JST - Japan Standard Time</option>
+                        <option value="KST">KST - Korea Standard Time</option>
+                        <option value="IST">IST - India Standard Time</option>
+                        <option value="CST_CN">CST - China Standard Time</option>
+                        <option value="ICT">ICT - Indochina Time</option>
+                    </optgroup>
+                    <optgroup label="Australia/Oceania">
+                        <option value="AEST">AEST - Australian Eastern Standard Time</option>
+                        <option value="AEDT">AEDT - Australian Eastern Daylight Time</option>
+                        <option value="AWST">AWST - Australian Western Standard Time</option>
+                        <option value="NZST">NZST - New Zealand Standard Time</option>
+                        <option value="NZDT">NZDT - New Zealand Daylight Time</option>
+                    </optgroup>
+                    <optgroup label="Other">
+                        <option value="UTC">UTC - Coordinated Universal Time</option>
+                        <option value="WAT">WAT - West Africa Time</option>
+                        <option value="CAT">CAT - Central Africa Time</option>
+                        <option value="EAT">EAT - East Africa Time</option>
+                    </optgroup>
+                    <optgroup label="UTC Offsets">
+                        <option value="UTC-12">GMT-12 (Baker Island)</option>
+                        <option value="UTC-11">GMT-11 (American Samoa)</option>
+                        <option value="UTC-10">GMT-10 (Hawaii)</option>
+                        <option value="UTC-9">GMT-9 (Alaska)</option>
+                        <option value="UTC-8">GMT-8 (Pacific Standard)</option>
+                        <option value="UTC-7">GMT-7 (Mountain Standard)</option>
+                        <option value="UTC-6">GMT-6 (Central Standard)</option>
+                        <option value="UTC-5">GMT-5 (Eastern Standard)</option>
+                        <option value="UTC-4">GMT-4 (Atlantic)</option>
+                        <option value="UTC-3">GMT-3 (Argentina)</option>
+                        <option value="UTC-2">GMT-2 (Mid-Atlantic)</option>
+                        <option value="UTC-1">GMT-1 (Azores)</option>
+                        <option value="UTC+0">UTC+0 (Greenwich Mean Time)</option>
+                        <option value="UTC+1">GMT+1 (Central European)</option>
+                        <option value="UTC+2">GMT+2 (Eastern European)</option>
+                        <option value="UTC+3">GMT+3 (Moscow)</option>
+                        <option value="UTC+4">GMT+4 (Dubai)</option>
+                        <option value="UTC+5">GMT+5 (Pakistan)</option>
+                        <option value="UTC+6">GMT+6 (Bangladesh)</option>
+                        <option value="UTC+7">GMT+7 (Thailand)</option>
+                        <option value="UTC+8">GMT+8 (China)</option>
+                        <option value="UTC+9">GMT+9 (Japan)</option>
+                        <option value="UTC+10">GMT+10 (Australia East)</option>
+                        <option value="UTC+11">GMT+11 (Solomon Islands)</option>
+                        <option value="UTC+12">GMT+12 (New Zealand)</option>
+                    </optgroup>
+                </select>
+            </div>
+
+            <div class="input-group">
+                <label>Date</label>
+                <input type="date" id="date">
+            </div>
+
+            <div class="input-group">
+                <label>Time</label>
+                <div class="input-row">
+                    <input type="time" id="time" value="00:00">
+                    <select id="ampm">
+                        <option value="">24h</option>
+                        <option value="AM">AM</option>
+                        <option value="PM">PM</option>
+                    </select>
+                </div>
+            </div>
+
+            <div class="input-group target-section">
+                <label>Convert to</label>
+                <select id="targetTimezone">
+                    <option value="CET">CET / CEST NORWAY</option>
+                    <optgroup label="America">
+                        <option value="PST">PST - Pacific Standard Time</option>
+                        <option value="PDT">PDT - Pacific Daylight Time</option>
+                        <option value="EST">EST - Eastern Standard Time</option>
+                        <option value="EDT">EDT - Eastern Daylight Time</option>
+                        <option value="CST">CST - Central Standard Time</option>
+                        <option value="CDT">CDT - Central Daylight Time</option>
+                        <option value="MST">MST - Mountain Standard Time</option>
+                        <option value="MDT">MDT - Mountain Daylight Time</option>
+                    </optgroup>
+                    <optgroup label="Europe">
+                        <option value="CEST">CEST - Central European Summer Time</option>
+                        <option value="GMT">GMT - Greenwich Mean Time</option>
+                        <option value="BST">BST - British Summer Time</option>
+                        <option value="EET">EET - Eastern European Time</option>
+                        <option value="EEST">EEST - Eastern European Summer Time</option>
+                    </optgroup>
+                    <optgroup label="Asia">
+                        <option value="JST">JST - Japan Standard Time</option>
+                        <option value="KST">KST - Korea Standard Time</option>
+                        <option value="IST">IST - India Standard Time</option>
+                        <option value="CST_CN">CST - China Standard Time</option>
+                        <option value="ICT">ICT - Indochina Time</option>
+                    </optgroup>
+                    <optgroup label="Australia/Oceania">
+                        <option value="AEST">AEST - Australian Eastern Standard Time</option>
+                        <option value="AEDT">AEDT - Australian Eastern Daylight Time</option>
+                        <option value="AWST">AWST - Australian Western Standard Time</option>
+                        <option value="NZST">NZST - New Zealand Standard Time</option>
+                        <option value="NZDT">NZDT - New Zealand Daylight Time</option>
+                    </optgroup>
+                    <optgroup label="Other">
+                        <option value="UTC">UTC - Coordinated Universal Time</option>
+                        <option value="WAT">WAT - West Africa Time</option>
+                        <option value="CAT">CAT - Central Africa Time</option>
+                        <option value="EAT">EAT - East Africa Time</option>
+                    </optgroup>
+                    <optgroup label="UTC Offsets">
+                        <option value="UTC-12">GMT-12 (Baker Island)</option>
+                        <option value="UTC-11">GMT-11 (American Samoa)</option>
+                        <option value="UTC-10">GMT-10 (Hawaii)</option>
+                        <option value="UTC-9">GMT-9 (Alaska)</option>
+                        <option value="UTC-8">GMT-8 (Pacific Standard)</option>
+                        <option value="UTC-7">GMT-7 (Mountain Standard)</option>
+                        <option value="UTC-6">GMT-6 (Central Standard)</option>
+                        <option value="UTC-5">GMT-5 (Eastern Standard)</option>
+                        <option value="UTC-4">GMT-4 (Atlantic)</option>
+                        <option value="UTC-3">GMT-3 (Argentina)</option>
+                        <option value="UTC-2">GMT-2 (Mid-Atlantic)</option>
+                        <option value="UTC-1">GMT-1 (Azores)</option>
+                        <option value="UTC+0">UTC+0 (Greenwich Mean Time)</option>
+                        <option value="UTC+1">GMT+1 (Central European)</option>
+                        <option value="UTC+2">GMT+2 (Eastern European)</option>
+                        <option value="UTC+3">GMT+3 (Moscow)</option>
+                        <option value="UTC+4">GMT+4 (Dubai)</option>
+                        <option value="UTC+5">GMT+5 (Pakistan)</option>
+                        <option value="UTC+6">GMT+6 (Bangladesh)</option>
+                        <option value="UTC+7">GMT+7 (Thailand)</option>
+                        <option value="UTC+8">GMT+8 (China)</option>
+                        <option value="UTC+9">GMT+9 (Japan)</option>
+                        <option value="UTC+10">GMT+10 (Australia East)</option>
+                        <option value="UTC+11">GMT+11 (Solomon Islands)</option>
+                        <option value="UTC+12">GMT+12 (New Zealand)</option>
+                    </optgroup>
+                </select>
+            </div>
+
+            <div class="result-section" id="resultBox">
+                <div class="result-time" id="resultTime">Select timezone</div>
+                <div class="result-details" id="resultDetails">Select a timezone from the dropdown above</div>
+            </div>
+            
+            <div class="countdown-section" id="countdownSection" style="display: none;">
+                <p class="countdown-info" id="countdownInfo">Creates a countdown timer until the converted time</p>
+                <button class="btn btn-primary" id="createCountdownBtn">Create Countdown</button>
+            </div>
+
+            <div class="button-group">
+                <button class="btn btn-primary" id="convertBtn">Convert</button>
+                <button class="btn btn-secondary" id="clearBtn">Clear</button>
+            </div>
+        </div>
+    </div>
+
+    <script src="tab-calculator.js"></script>
+</body>
+</html>
